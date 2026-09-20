@@ -9,6 +9,8 @@ the frame useless for anyone who won't run a converter before every photo.
 This does the converting on the device: put `.jpg` files in `pic/`, done. No WiFi, no app, no cloud —
 the RP2040 in this thing has no radio at all, which is the whole reason I picked it.
 
+![The frame showing a photo straight off the SD card](docs/frame.jpg)
+
 ## Flash it
 
 1. Grab `photopainter-jpg.uf2` from [Releases](../../releases).
@@ -46,6 +48,10 @@ Handy for checking your photos, and how you'd use it as a desk toy.
 
 A 12 MP photo takes about 15 seconds to decode, plus the ~33 seconds the panel needs to refresh.
 The RP2040 runs at 250 MHz for this.
+
+![A dark photo with a sunset gradient on the panel](docs/frame-dark.jpg)
+
+Seven colours and a dusk sky is about the hardest thing you can ask of this panel. It holds up.
 
 ## Change the interval
 
