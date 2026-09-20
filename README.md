@@ -73,11 +73,20 @@ ninja -C build
 
 ## Which hardware
 
-The [PhotoPainter](https://www.waveshare.com/photopainter.htm) with the **RP2040** and the 7.3"
-7-colour (ACeP / "F") panel.
+Waveshare sells several frames called PhotoPainter. This one is for the original
+[PhotoPainter](https://www.waveshare.com/photopainter.htm): RP2040, 7.3" 7-colour ACeP panel.
 
-Not tested on the ESP32-S3 version or the newer Spectra 6 "(B)" model. The B version should be close
-— same MCU, different panel driver — but I don't have one to try.
+| Model | |
+|---|---|
+| PhotoPainter (RP2040) | this one |
+| PhotoPainter (B) — Pico 2, Spectra 6 | small port, see below |
+| ESP32-S3-PhotoPainter | no, and it doesn't need one — that firmware already decodes JPEG |
+| RPi Zero PhotoPainter | no, that one runs Linux, where Pillow does the job in ten lines |
+
+Porting to the (B) is not much work: the pinout is the same, so it comes down to swapping
+`lib/e-Paper` for its `EPD_7in3e` driver, setting `PICO_BOARD pico2`, and rewriting `PAL[]` in
+`lib/GUI/GUI_JPGfile.c` for the six Spectra colours — no orange, and the indices are different.
+Open an issue if you have one and want to try it, I don't have the hardware here.
 
 ## Limits
 
