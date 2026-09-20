@@ -93,3 +93,7 @@ ChaN's [TJpgDec](http://elm-chan.org/fsw/tjpgd/). Panel colour values borrowed f
 library, which has clearly spent more time staring at these things than I have.
 
 MIT, same as upstream. TJpgDec keeps its own licence — see the header in `lib/tjpgd/tjpgd.c`.
+
+---
+
+Built by [Alexander West](https://thewest.cc).
