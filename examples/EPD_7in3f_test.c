@@ -34,12 +34,30 @@
 #include "EPD_7in3f.h"
 #include "GUI_Paint.h"
 #include "GUI_BMPfile.h"
+#include "GUI_JPGfile.h"
 
 #include <stdlib.h> // malloc() free()
 #include <string.h>
+#include <strings.h>
 
 int EPD_7in3f_display_BMP(const char *path, float vol)
 {
+    // On USB power the panel stays powered between pictures and sits in
+    // DEEP_SLEEP from the previous refresh; the RST pulse in Init does not
+    // wake it and the next refresh is silently ignored. Real power cycle:
+    // all panel lines low (otherwise the IO pins keep it alive through the
+    // ESD diodes), rail off for a second, then restore SPI. Harmless on
+    // battery, where the whole board is switched off between pictures.
+    const uint8_t pins[] = {EPD_RST_PIN, EPD_DC_PIN, EPD_CS_PIN, EPD_CLK_PIN, EPD_MOSI_PIN};
+    for (int i = 0; i < 5; i++) { gpio_init(pins[i]); gpio_set_dir(pins[i], GPIO_OUT); gpio_put(pins[i], 0); }
+    DEV_Digital_Write(EPD_POWER_EN, 0);
+    DEV_Delay_ms(1000);
+    DEV_Digital_Write(EPD_POWER_EN, 1);
+    DEV_Delay_ms(100);
+    gpio_set_function(EPD_CLK_PIN, GPIO_FUNC_SPI);
+    gpio_set_function(EPD_MOSI_PIN, GPIO_FUNC_SPI);
+    DEV_Digital_Write(EPD_CS_PIN, 1);
+
     printf("e-Paper Init and Clear...\r\n");
     EPD_7IN3F_Init();
 
@@ -61,12 +79,25 @@ int EPD_7in3f_display_BMP(const char *path, float vol)
     Paint_SelectImage(BlackImage);
     Paint_Clear(EPD_7IN3F_WHITE);
     
-    GUI_ReadBmp_RGB_7Color(path, 0, 0);
-
-    if(Paint_GetRotate() == 90)
-        Paint_SetRotate(270);
-    else
-        Paint_SetRotate(180);
+    const char *ext = strrchr(path, '.');
+    const char *err = NULL;
+    if(ext && (!strcasecmp(ext, ".jpg") || !strcasecmp(ext, ".jpeg"))) {
+        Paint_SetRotate(180);   // upright orientation of the panel, same as the text below
+        GUI_ReadJpg_7Color(path, &err);
+    }
+    else {
+        GUI_ReadBmp_RGB_7Color(path, 0, 0);
+        if(Paint_GetRotate() == 90)
+            Paint_SetRotate(270);
+        else
+            Paint_SetRotate(180);
+    }
+    if(err) {   // tell the user why this picture is skipped instead of showing garbage
+        printf("%s: %s\r\n", path, err);
+        Paint_Clear(EPD_7IN3F_WHITE);
+        Paint_DrawString_EN(10, 10, err, &Font16, EPD_7IN3F_BLACK, EPD_7IN3F_WHITE);
+        Paint_DrawString_EN(10, 26, path, &Font16, EPD_7IN3F_BLACK, EPD_7IN3F_WHITE);
+    }
     char strvol[21] = {0};
     sprintf(strvol, "%f V", vol);
     if(vol < 3.3) {

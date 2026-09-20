@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h> // malloc() free()
 #include <string.h>
+#include <strings.h>
 
 const char *fileList = "fileList.txt";          // Picture names store files
 const char *fileListNew = "fileListNew.txt";    // Sort good picture name temporarily store file
@@ -170,6 +171,12 @@ void ls(const char *dir) {
         dir: Directory path
         path: File path
 */
+/* Accept the formats the display code can render: .jpg/.jpeg (decoded on device) and .bmp */
+static int is_picture(const char *name) {
+    const char *ext = strrchr(name, '.');
+    return ext && (!strcasecmp(ext, ".jpg") || !strcasecmp(ext, ".jpeg") || !strcasecmp(ext, ".bmp"));
+}
+
 void ls2file(const char *dir, const char *path) {
     char cwdbuf[FF_LFN_BUF] = {0};
     FRESULT fr; /* Return value */
@@ -218,8 +225,7 @@ void ls2file(const char *dir, const char *path) {
         }
         /* Create a string that includes the file name, the file size and the
          attributes string. */
-        if(fno.fname) {
-            // f_printf(&fil, "%d %s\r\n", filNum, fno.fname);
+        if(!(fno.fattrib & AM_DIR) && is_picture(fno.fname)) {
             f_printf(&fil, "pic/%s\r\n", fno.fname);
             filNum++;
         }
@@ -341,11 +347,11 @@ void fil2array(int index)
 
     // printf("ls array path\r\n");
     for(int i=0; i<index; i++) {
-        if(f_gets(pathName, 999, &fil) == NULL) {
+        if(f_gets(pathName, fileLen, &fil) == NULL) {
             break;
         }
-        // printf("%s", pathName[i]);
     }
+    pathName[strcspn(pathName, "\r\n")] = '\0';   // f_gets keeps the line ending
 
     f_close(&fil);
     run_unmount();

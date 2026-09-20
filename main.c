@@ -6,6 +6,8 @@
 #include "DEV_Config.h"
 
 #include <time.h>
+#include "hardware/vreg.h"
+#include "hardware/clocks.h"
 
 extern const char *fileList;
 extern char pathName[];
@@ -17,7 +19,7 @@ Mode 0: Automatically get pic folder names and sort them
 Mode 1: Automatically get pic folder names but not sorted
 Mode 2: pic folder name is not automatically obtained, users need to create fileList.txt file and write the picture name in TF card by themselves
 */
-#define Mode 2
+#define Mode 0
 
 
 float measureVBAT(void)
@@ -30,7 +32,7 @@ float measureVBAT(void)
     return Voltage;
 }
 
-void chargeState_callback() 
+void chargeState_callback(uint gpio, uint32_t events)
 {
     if(DEV_Digital_Read(VBUS)) {
         if(!DEV_Digital_Read(CHARGE_STATE)) {  // is charging
@@ -65,6 +67,11 @@ int main(void)
     alarmTime.hours +=24;
     char isCard = 0;
   
+    // 250 MHz halves the JPEG decode time (~25 s -> ~12 s for a 12 MP photo)
+    vreg_set_voltage(VREG_VOLTAGE_1_15);
+    sleep_ms(10);
+    set_sys_clock_khz(250000, true);
+
     printf("Init...\r\n");
     if(DEV_Module_Init() != 0) {  // DEV init
         return -1;
@@ -115,7 +122,7 @@ int main(void)
         run_display(Time, alarmTime, isCard);
     }
     else {  // charge state
-        chargeState_callback();
+        chargeState_callback(CHARGE_STATE, 0);
         while(DEV_Digital_Read(VBUS)) {
             measureVBAT();
             
