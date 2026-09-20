@@ -111,4 +111,4 @@ MIT, same as upstream. TJpgDec keeps its own licence — see the header in `lib/
 
 ---
 
-Built by [Alexander West](https://thewest.cc).
+Built by [Alexander West](https://thewest.cc/?utm_source=github&utm_medium=readme&utm_campaign=photopainter-jpg).
