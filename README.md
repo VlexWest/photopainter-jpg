@@ -29,7 +29,7 @@ pic/
 
 Any size, any aspect ratio, straight from a phone. 
 The frame picks the next one every 24 hours, sorted by filename. BMPs still work like before.
-You can manually enforce a change by klicking the "NEXT" button on your photopainter.
+You can manually enforce a change by clicking the "NEXT" button on your photopainter.
 
 ## What it does to your photos
 
